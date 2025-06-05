@@ -1,12 +1,13 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
+#include <ctype.h>
 #include <stdlib.h>
 
 int CRVENI = 1;
-int CRNI = 2;
+int ZELENI = 2;
 int DAMA_CRVENI = 3;
-int DAMA_CRNI = 4;
+int DAMA_ZELENI = 4;
 
 int ispisiPlocu(int ploca[8][8])
 {
@@ -18,6 +19,7 @@ int ispisiPlocu(int ploca[8][8])
     {
         printf("%2d ", stupac + 1);
     }
+
     printf("\n");
 
     for (red = 0; red < 8; red++)
@@ -33,19 +35,19 @@ int ispisiPlocu(int ploca[8][8])
                     printf("🔴 ");
                 }
 
-                else if (ploca[red][stupac] == CRNI)
+                else if (ploca[red][stupac] == ZELENI)
                 {
-                    printf("⚫ ");
+                    printf("🟢 ");
                 }
 
                 else if (ploca[red][stupac] == DAMA_CRVENI)
                 {
-                    printf("🟠");
+                    printf("🟠 ");
                 }
 
-                else if (ploca[red][stupac] == DAMA_CRNI)
+                else if (ploca[red][stupac] == DAMA_ZELENI)
                 {
-                    printf("🟤");
+                    printf("🟤 ");
                 }
 
                 else
@@ -71,7 +73,7 @@ int promijeniIgraca(int trenutni_igrac)
 {
     if (trenutni_igrac == CRVENI || trenutni_igrac == DAMA_CRVENI)
     {
-        return CRNI;
+        return ZELENI;
     }
 
     else
@@ -82,11 +84,9 @@ int promijeniIgraca(int trenutni_igrac)
 
 int imaFigure(int ploca[8][8], int igrac)
 {
-    int red, stupac;
-
-    for (red = 0; red < 8; red++)
+    for (int red = 0; red < 8; red++)
     {
-        for (stupac = 0; stupac < 8; stupac++)
+        for (int stupac = 0; stupac < 8; stupac++)
         {
             if (ploca[red][stupac] == igrac || ploca[red][stupac] == igrac + 2)
             {
@@ -100,6 +100,15 @@ int imaFigure(int ploca[8][8], int igrac)
 int main()
 {
     int izbor;
+    char ime1[100], ime2[100];
+
+    printf("Unesite ime igraca 1: ");
+    fgets(ime1, 100, stdin);
+    ime1[strcspn(ime1, "\n")] = '\0';
+
+    printf("Unesite ime igraca 2: ");
+    fgets(ime2, 100, stdin);
+    ime2[strcspn(ime2, "\n")] = '\0';
 
     while (1)
     {
@@ -111,13 +120,11 @@ int main()
         printf("4. Izlaz\n");
         printf("Unesite svoj izbor (1-4): ");
 
-        if (scanf("%d", &izbor) != 1)
+        char unos[100];
+        fgets(unos, sizeof(unos), stdin);
+        if (sscanf(unos, "%d", &izbor) != 1)
         {
-            printf("Neispravan unos!\n");
-
-            char spremnik[100];
-
-            fgets(spremnik, sizeof(spremnik), stdin); // Očisti ulazni spremnik
+            printf("Neispravan unos! Unesite broj od 1 do 4.\n\n");
             continue;
         }
 
@@ -130,12 +137,12 @@ int main()
         else if (izbor == 2)
         {
             printf("\n=== Meni ===\n");
-            printf("Prvi igrač je crven (🔴), a drugi crn (⚫).\n");
+            printf("Prvi igrač je crven (🔴), a drugi zelen (🟢).\n");
             printf("Oba igrača se kreću upisivanjem početne i krajnje pozicije.\n");
             printf("Kada pijun dođe do zadnjeg reda, postaje dama.\n");
             printf("Dama se može kretati dijagonalno u svim smjerovima.\n");
             printf("Dama jede protivničke pijune.\n");
-            printf("Cilj je pojesti sve protivničke pijune.\n\n");
+            printf("Cilj je pojesti ili blokirati sve protivničke pijune.\n\n");
         }
 
         else if (izbor == 3)
@@ -147,7 +154,7 @@ int main()
             printf("Ako je protivnički pijun ispred, a iza njega prazno polje, skače se.\n");
             printf("Skakanje je moguće, ali nije obavezno.\n");
             printf("Dama se kreće dijagonalno naprijed i unatrag.\n");
-            printf("Može skakati protivničke figure u oba smjera.\n\n");
+            printf("Može pojesti protivničke figure u oba smjera.\n\n");
         }
 
         else if (izbor == 4)
@@ -162,12 +169,11 @@ int main()
         }
     }
 
-    int ploca[8][8];
-    int red, stupac;
+    int ploca[8][8] = {0};
 
-    for (red = 0; red < 8; red++)
+    for (int red = 0; red < 8; red++)
     {
-        for (stupac = 0; stupac < 8; stupac++)
+        for (int stupac = 0; stupac < 8; stupac++)
         {
             if ((red + stupac) % 2 == 0)
             {
@@ -178,18 +184,8 @@ int main()
 
                 else if (red > 4)
                 {
-                    ploca[red][stupac] = CRNI;
+                    ploca[red][stupac] = ZELENI;
                 }
-
-                else
-                {
-                    ploca[red][stupac] = 0;
-                }
-            }
-
-            else
-            {
-                ploca[red][stupac] = 0;
             }
         }
     }
@@ -202,60 +198,83 @@ int main()
 
         if (!imaFigure(ploca, trenutni_igrac))
         {
-            printf("Igrac %d nema vise figura. Igra zavrsena!\n", trenutni_igrac);
-            printf("Pobjednik je igrac %d\n", promijeniIgraca(trenutni_igrac));
+            if (trenutni_igrac == CRVENI || trenutni_igrac == DAMA_CRVENI)
+            {
+                printf("\033[0;31mIgrac %s nema vise figura. Igra zavrsena!\033[0m\n", ime1);
+                printf("\033[0;32mPobjednik je %s\033[0m\n", ime2);
+            }
+
+            else
+            {
+                printf("\033[0;32mIgrac %s nema vise figura. Igra zavrsena!\033[0m\n", ime2);
+                printf("\033[0;31mPobjednik je %s\033[0m\n", ime1);
+            }
             break;
         }
 
         int red_pocetak, stupac_pocetak, red_kraj, stupac_kraj;
+        int ispravan_unos = 0;
 
-        printf("Igrac(%d) (1=🔴, 2=⚫), Unesite potez (red stupac red stupac): ", trenutni_igrac);
-
-        if (scanf("%d %d %d %d", &red_pocetak, &stupac_pocetak, &red_kraj, &stupac_kraj) != 4)
+        while (!ispravan_unos)
         {
-            printf("Neispravan unos! Pokusajte ponovo.\n");
+            if (trenutni_igrac == CRVENI || trenutni_igrac == DAMA_CRVENI)
+            {
+                printf("\033[0;31m%s (🔴), Unesite potez (red stupac red stupac): \033[0m", ime1);
+            }
 
-            char spremnik[100];
+            else
+            {
+                printf("\033[0;32m%s (🟢), Unesite potez (red stupac red stupac): \033[0m", ime2);
+            }
 
-            fgets(spremnik, sizeof(spremnik), stdin); // Očisti ulazni spremnik
-            continue;
-        }
+            char unos[100];
+            fgets(unos, sizeof(unos), stdin);
 
-        red_pocetak--;
-        stupac_pocetak--;
-        red_kraj--;
-        stupac_kraj--;
+            if (sscanf(unos, "%d %d %d %d", &red_pocetak, &stupac_pocetak, &red_kraj, &stupac_kraj) != 4)
+            {
+                printf("Neispravan unos! Unesite 4 broja (npr. '2 3 3 4').\n");
+                continue;
+            }
 
-        if (red_pocetak < 0 || red_pocetak >= 8 || stupac_pocetak < 0 || stupac_pocetak >= 8 ||
-            red_kraj < 0 || red_kraj >= 8 || stupac_kraj < 0 || stupac_kraj >= 8)
-        {
-            printf("Neispravne koordinate! Pokusajte ponovo.\n");
-            continue;
-        }
+            red_pocetak--;
+            stupac_pocetak--;
+            red_kraj--;
+            stupac_kraj--;
 
-        if ((red_pocetak + stupac_pocetak) % 2 != 0 || (red_kraj + stupac_kraj) % 2 != 0)
-        {
-            printf("Potez mora biti na tamnim poljima! Pokusajte ponovo.\n");
-            continue;
+            if (red_pocetak < 0 || red_pocetak >= 8 || stupac_pocetak < 0 || stupac_pocetak >= 8 ||
+                red_kraj < 0 || red_kraj >= 8 || stupac_kraj < 0 || stupac_kraj >= 8)
+            {
+                printf("Neispravne koordinate! Unesite brojeve od 1 do 8.\n");
+                continue;
+            }
+
+            if ((red_pocetak + stupac_pocetak) % 2 != 0 || (red_kraj + stupac_kraj) % 2 != 0)
+
+            {
+                printf("Potez mora biti na tamnim poljima!\n");
+                continue;
+            }
+
+            int figura_sa = ploca[red_pocetak][stupac_pocetak];
+
+            if (figura_sa != trenutni_igrac && figura_sa != trenutni_igrac + 2)
+            {
+                printf("Na odabranoj početnoj poziciji nema vaše figure!\n");
+                continue;
+            }
+
+            if (ploca[red_kraj][stupac_kraj] != 0)
+            {
+                printf("Ciljna pozicija nije prazna!\n");
+                continue;
+            }
+
+            ispravan_unos = 1;
         }
 
         int figura_sa = ploca[red_pocetak][stupac_pocetak];
-
-        if (figura_sa != trenutni_igrac && figura_sa != trenutni_igrac + 2)
-        {
-            printf("Na odabranoj početnoj poziciji nema vaše figure! Pokusajte ponovo.\n");
-            continue;
-        }
-
-        if (ploca[red_kraj][stupac_kraj] != 0)
-        {
-            printf("Ciljna pozicija nije prazna! Pokusajte ponovo.\n");
-            continue;
-        }
-
         int razlika_red = red_kraj - red_pocetak;
         int razlika_stupac = stupac_kraj - stupac_pocetak;
-
         int apsolutna_razlika_red = abs(razlika_red);
         int apsolutna_razlika_stupac = abs(razlika_stupac);
 
@@ -264,7 +283,6 @@ int main()
         {
             if (apsolutna_razlika_red == 1 && apsolutna_razlika_stupac == 1 && razlika_red == 1)
             {
-                // Normalni hod
                 ploca[red_kraj][stupac_kraj] = figura_sa;
                 ploca[red_pocetak][stupac_pocetak] = 0;
             }
@@ -274,7 +292,7 @@ int main()
                 int red_skok = red_pocetak + 1;
                 int stupac_skok = stupac_pocetak + (razlika_stupac / 2);
 
-                if (ploca[red_skok][stupac_skok] == CRNI || ploca[red_skok][stupac_skok] == DAMA_CRNI)
+                if (ploca[red_skok][stupac_skok] == ZELENI || ploca[red_skok][stupac_skok] == DAMA_ZELENI)
                 {
                     ploca[red_kraj][stupac_kraj] = figura_sa;
                     ploca[red_pocetak][stupac_pocetak] = 0;
@@ -283,19 +301,19 @@ int main()
 
                 else
                 {
-                    printf("Nema protivničke figure za preskakanje! Pokusajte ponovo.\n");
+                    printf("Nema protivničke figure za preskakanje!\n");
                     continue;
                 }
             }
 
             else
             {
-                printf("Neispravan potez za crveni pijun! Pokusajte ponovo.\n");
+                printf("Neispravan potez za crveni pijun!\n");
                 continue;
             }
         }
-        // Pravila za pijuna crnog
-        else if (figura_sa == CRNI)
+        // Pravila za pijuna zelenog
+        else if (figura_sa == ZELENI)
         {
             if (apsolutna_razlika_red == 1 && apsolutna_razlika_stupac == 1 && razlika_red == -1)
             {
@@ -317,38 +335,37 @@ int main()
 
                 else
                 {
-                    printf("Nema protivničke figure za preskakanje! Pokusajte ponovo.\n");
+                    printf("Nema protivničke figure za preskakanje!\n");
                     continue;
                 }
             }
 
             else
             {
-                printf("Neispravan potez za crni pijun! Pokusajte ponovo.\n");
+                printf("Neispravan potez za zeleni pijun!\n");
                 continue;
             }
         }
         // Pravila za damu
-        else if (figura_sa == DAMA_CRVENI || figura_sa == DAMA_CRNI)
+        else if (figura_sa == DAMA_CRVENI || figura_sa == DAMA_ZELENI)
         {
             if (apsolutna_razlika_red == apsolutna_razlika_stupac && apsolutna_razlika_red > 0)
             {
                 int smjer_red = (razlika_red > 0) ? 1 : -1;
                 int smjer_stupac = (razlika_stupac > 0) ? 1 : -1;
-
                 int protivnicke_figure = 0;
                 int red_protivnik = -1, stupac_protivnik = -1;
                 int red_prolaz = red_pocetak + smjer_red;
                 int stupac_prolaz = stupac_pocetak + smjer_stupac;
 
-                // Provjera puta
                 while (red_prolaz != red_kraj && stupac_prolaz != stupac_kraj)
                 {
                     if (ploca[red_prolaz][stupac_prolaz] != 0)
                     {
-                        if (ploca[red_prolaz][stupac_prolaz] == trenutni_igrac || ploca[red_prolaz][stupac_prolaz] == trenutni_igrac + 2)
+                        if (ploca[red_prolaz][stupac_prolaz] == trenutni_igrac ||
+                            ploca[red_prolaz][stupac_prolaz] == trenutni_igrac + 2)
                         {
-                            break; // Blokiran potez
+                            break;
                         }
 
                         else
@@ -358,13 +375,13 @@ int main()
                             stupac_protivnik = stupac_prolaz;
                         }
                     }
-                    red_prolaz += smer_red;
-                    stupac_prolaz += smer_stupac;
+                    red_prolaz += smjer_red;
+                    stupac_prolaz += smjer_stupac;
                 }
 
                 if (protivnicke_figure > 1)
                 {
-                    printf("Dama može pojesti samo jednu protivničku figuru po potezu! Pokusajte ponovo.\n");
+                    printf("Dama može pojesti samo jednu figuru po potezu!\n");
                     continue;
                 }
 
@@ -379,20 +396,20 @@ int main()
 
             else
             {
-                printf("Neispravan potez za damu! Pokusajte ponovo.\n");
+                printf("Neispravan potez za damu!\n");
                 continue;
             }
         }
 
-        // Promjena u damu ako pijun dođe na kraj
-        if (trenutni_igrac == CRVENI && red_kraj == 7 && figura_sa == CRVENI)
+        // Promjena u damu
+        if (figura_sa == CRVENI && red_kraj == 7)
         {
             ploca[red_kraj][stupac_kraj] = DAMA_CRVENI;
         }
 
-        else if (trenutni_igrac == CRNI && red_kraj == 0 && figura_sa == CRNI)
+        else if (figura_sa == ZELENI && red_kraj == 0)
         {
-            ploca[red_kraj][stupac_kraj] = DAMA_CRNI;
+            ploca[red_kraj][stupac_kraj] = DAMA_ZELENI;
         }
 
         trenutni_igrac = promijeniIgraca(trenutni_igrac);
