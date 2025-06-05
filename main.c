@@ -52,13 +52,13 @@ int ispisiPlocu(int ploca[8][8])
 
                 else
                 {
-                    printf("⬛ ");
+                    printf("◾ ");
                 }
             }
 
             else
             {
-                printf("⬜ ");
+                printf("◽ ");
             }
         }
 
@@ -66,6 +66,7 @@ int ispisiPlocu(int ploca[8][8])
     }
 
     printf("\n");
+
     return 0;
 }
 
