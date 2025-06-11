@@ -106,10 +106,12 @@ int main()
     printf("Unesite ime igraca 1: ");
     fgets(ime1, 100, stdin);
     ime1[strcspn(ime1, "\n")] = '\0';
+    printf("\n");
 
     printf("Unesite ime igraca 2: ");
     fgets(ime2, 100, stdin);
     ime2[strcspn(ime2, "\n")] = '\0';
+    printf("\n\n");
 
     while (1)
     {
@@ -279,8 +281,7 @@ int main()
         int apsolutna_razlika_red = abs(razlika_red);
         int apsolutna_razlika_stupac = abs(razlika_stupac);
 
-        // Pravila za pijuna crvenog
-        if (figura_sa == CRVENI)
+        if (figura_sa == CRVENI)// Pravila za pijuna crvenog
         {
             if (apsolutna_razlika_red == 1 && apsolutna_razlika_stupac == 1 && razlika_red == 1)
             {
@@ -321,39 +322,59 @@ int main()
                 ploca[red_kraj][stupac_kraj] = figura_sa;
                 ploca[red_pocetak][stupac_pocetak] = 0;
             }
-
+            
             else if (apsolutna_razlika_red == 2 && apsolutna_razlika_stupac == 2 && razlika_red == -2)
             {
                 int red_skok = red_pocetak - 1;
                 int stupac_skok = stupac_pocetak + (razlika_stupac / 2);
-
+                
                 if (ploca[red_skok][stupac_skok] == CRVENI || ploca[red_skok][stupac_skok] == DAMA_CRVENI)
                 {
                     ploca[red_kraj][stupac_kraj] = figura_sa;
                     ploca[red_pocetak][stupac_pocetak] = 0;
                     ploca[red_skok][stupac_skok] = 0;
                 }
-
+                
                 else
                 {
                     printf("Nema protivničke figure za preskakanje!\n");
                     continue;
                 }
             }
-
+            
             else
             {
                 printf("Neispravan potez za zeleni pijun!\n");
                 continue;
             }
         }
-        // Pravila za damu
+        // Pravila za damu //
         else if (figura_sa == DAMA_CRVENI || figura_sa == DAMA_ZELENI)
         {
             if (apsolutna_razlika_red == apsolutna_razlika_stupac && apsolutna_razlika_red > 0)
             {
-                int smjer_red = (razlika_red > 0) ? 1 : -1;
-                int smjer_stupac = (razlika_stupac > 0) ? 1 : -1;
+                int smjer_red;
+                if(razlika_red > 0)
+                {
+                    smjer_red = 1;
+                }
+
+                else
+                {
+                    smjer_red = -1;
+                }
+
+                int smjer_stupac;
+                if (razlika_stupac > 0)
+                {
+                    smjer_stupac = 1;
+                }
+
+                else
+                {
+                    smjer_stupac = -1;
+                }
+
                 int protivnicke_figure = 0;
                 int red_protivnik = -1, stupac_protivnik = -1;
                 int red_prolaz = red_pocetak + smjer_red;
@@ -401,8 +422,7 @@ int main()
                 continue;
             }
         }
-
-        // Promjena u damu
+        // Promjena u damu //
         if (figura_sa == CRVENI && red_kraj == 7)
         {
             ploca[red_kraj][stupac_kraj] = DAMA_CRVENI;
